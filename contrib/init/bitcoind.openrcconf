@@ -1,0 +1,33 @@
+# /etc/conf.d/coinwowd: config file for /etc/init.d/coinwowd
+
+# Config file location
+#COINWOWD_CONFIGFILE="/etc/coinwow/coinwow.conf"
+
+# What directory to write pidfile to?  (created and owned by $COINWOWD_USER)
+#COINWOWD_PIDDIR="/var/run/coinwowd"
+
+# What filename to give the pidfile
+#COINWOWD_PIDFILE="${COINWOWD_PIDDIR}/coinwowd.pid"
+
+# Where to write coinwowd data (be mindful that the blockchain is large)
+#COINWOWD_DATADIR="/var/lib/coinwowd"
+
+# User and group to own coinwowd process
+#COINWOWD_USER="coinwow"
+#COINWOWD_GROUP="coinwow"
+
+# Path to coinwowd executable
+#COINWOWD_BIN="/usr/bin/coinwowd"
+
+# Nice value to run coinwowd under
+#COINWOWD_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#COINWOWD_OPTS=""
+
+# The timeout in seconds OpenRC will wait for coinwowd to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+COINWOWD_SIGTERM_TIMEOUT=600

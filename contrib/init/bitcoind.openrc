@@ -1,0 +1,93 @@
+#!/sbin/openrc-run
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/coinwow/.coinwow" ]; then
+	COINWOWD_DEFAULT_DATADIR="/var/lib/coinwow/.coinwow"
+else
+	COINWOWD_DEFAULT_DATADIR="/var/lib/coinwowd"
+fi
+
+COINWOWD_CONFIGFILE=${COINWOWD_CONFIGFILE:-/etc/coinwow/coinwow.conf}
+COINWOWD_PIDDIR=${COINWOWD_PIDDIR:-/var/run/coinwowd}
+COINWOWD_PIDFILE=${COINWOWD_PIDFILE:-${COINWOWD_PIDDIR}/coinwowd.pid}
+COINWOWD_DATADIR=${COINWOWD_DATADIR:-${COINWOWD_DEFAULT_DATADIR}}
+COINWOWD_USER=${COINWOWD_USER:-${COINWOW_USER:-coinwow}}
+COINWOWD_GROUP=${COINWOWD_GROUP:-coinwow}
+COINWOWD_BIN=${COINWOWD_BIN:-/usr/bin/coinwowd}
+COINWOWD_NICE=${COINWOWD_NICE:-${NICELEVEL:-0}}
+COINWOWD_OPTS="${COINWOWD_OPTS:-${COINWOW_OPTS}}"
+
+name="COINWOW Core Daemon"
+description="COINWOW cryptocurrency P2P network daemon"
+
+command="/usr/bin/coinwowd"
+command_args="-pid=\"${COINWOWD_PIDFILE}\" \
+		-conf=\"${COINWOWD_CONFIGFILE}\" \
+		-datadir=\"${COINWOWD_DATADIR}\" \
+		-daemon \
+		${COINWOWD_OPTS}"
+
+required_files="${COINWOWD_CONFIGFILE}"
+start_stop_daemon_args="-u ${COINWOWD_USER} \
+			-N ${COINWOWD_NICE} -w 2000"
+pidfile="${COINWOWD_PIDFILE}"
+
+# The retry schedule to use when stopping the daemon. Could be either
+# a timeout in seconds or multiple signal/timeout pairs (like
+# "SIGKILL/180 SIGTERM/300")
+retry="${COINWOWD_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${COINWOWD_USER}:${COINWOWD_GROUP}" \
+	"${COINWOWD_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${COINWOWD_USER}:${COINWOWD_GROUP}" \
+	"${COINWOWD_PIDDIR}"
+
+	checkpath -f \
+	-o "${COINWOWD_USER}:${COINWOWD_GROUP}" \
+	-m 0660 \
+	"${COINWOWD_CONFIGFILE}"
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if grep -qs '^rpcuser=' "${COINWOWD_CONFIGFILE}" && \
+		! grep -qs '^rpcpassword=' "${COINWOWD_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run coinwowd."
+		eerror "The setting must appear in ${COINWOWD_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following "
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"COINWOW Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}

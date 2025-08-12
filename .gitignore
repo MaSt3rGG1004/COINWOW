@@ -1,0 +1,28 @@
+# Build & binaires
+build/
+**/CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+*.out
+
+# Données runtime / chaîne / logs
+.coinwow/
+blocks/
+chainstate/
+indexes/
+*.dat
+*.log
+
+# Archives locales
+*.tar.gz
+*.tgz
+*.zip
+
+# Qt générés
+src/qt/*.qm

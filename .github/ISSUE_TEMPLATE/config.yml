@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: COINWOW Core Security Policy
+    url: https://github.com/coinwow/coinwow/blob/master/SECURITY.md
+    about: View security policy
+  - name: COINWOW Core Developers
+    url: https://coinwowcore.org
+    about: COINWOW Core homepage
