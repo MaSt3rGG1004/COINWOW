@@ -1,28 +1,28 @@
-# Build & binaires
+# Builds & binaires
 build/
 **/CMakeFiles/
 CMakeCache.txt
-cmake_install.cmake
-Makefile
 *.o
 *.a
 *.so
-*.dylib
+*.dll
 *.exe
-*.out
+*.dSYM
 
-# Données runtime / chaîne / logs
+# Données runtime/noeud
 .coinwow/
-blocks/
-chainstate/
-indexes/
+wallets/
 *.dat
 *.log
 
-# Archives locales
+# Archives & temp
+*.tar
 *.tar.gz
-*.tgz
 *.zip
+*.7z
+*.tmp
 
-# Qt générés
-src/qt/*.qm
+# IDE
+.vscode/
+.idea/
+.DS_Store
