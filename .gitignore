@@ -22,7 +22,10 @@ wallets/
 *.7z
 *.tmp
 
-# IDE
+# IDE/OS
 .vscode/
 .idea/
 .DS_Store
+
+# Fichiers perso
+bfg.jar

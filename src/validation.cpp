@@ -1938,12 +1938,12 @@ PackageMempoolAcceptResult ProcessNewPackage(Chainstate& active_chainstate, CTxM
     return result;
 }
 
+// src/validation.cpp
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
 {
-    if (nHeight == 2) return 7000000 * COIN;
-    if (nHeight == 105) return 1 * COIN; // 7M sur block 2
-    if (nHeight == 200) return 2999999 * COIN; // 3M sur block 101
-    return 0; // Rien sur tous les autres blocks
+    if (nHeight == 309) return 7000000 * COIN; // 7 millions pour walletwow
+    if (nHeight == 310) return 3000000 * COIN; // 3 millions pour walletbosswow
+    return 0; // plus aucune récompense après
 }
 
 CoinsViews::CoinsViews(DBParams db_params, CoinsViewOptions options)
