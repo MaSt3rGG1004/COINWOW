@@ -26,6 +26,3 @@ wallets/
 .vscode/
 .idea/
 .DS_Store
-
-# Fichiers perso
-bfg.jar
