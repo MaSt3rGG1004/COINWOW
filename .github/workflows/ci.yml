@@ -146,10 +146,53 @@ jobs:
           key: ${{ github.job }}-${{ matrix.job-type }}-ccache-${{ github.run_id }}
           restore-keys: ${{ github.job }}-${{ matrix.job-type }}-ccache-
 
+      # Every BasicTestingSetup-derived unit/fuzz test (see
+      # src/test/util/setup_common.cpp) puts its per-process regtest datadir
+      # under fs::temp_directory_path(), i.e. wherever $TMPDIR points, not
+      # under $GITHUB_WORKSPACE. Left at its default, that resolves to the
+      # runner's ephemeral system temp dir (e.g. /var/folders/.../T on
+      # macOS), which is outside the checkout entirely, so the debug.log /
+      # blocks/ dump-and-upload steps below can never find anything there
+      # regardless of whether a crash actually happened. Redirecting TMPDIR
+      # into ci/scratch only relocates where those temp datadirs are
+      # created; it does not change any COINWOW/Bitcoin Core behavior.
+      - name: Redirect fuzz test datadirs into ci/scratch for debug capture
+        if: matrix.job-type == 'fuzz'
+        run: |
+          mkdir -p "${GITHUB_WORKSPACE}/ci/scratch/tmp"
+          echo "TMPDIR=${GITHUB_WORKSPACE}/ci/scratch/tmp" >> "$GITHUB_ENV"
+
       - name: CI script
         run: ./ci/test_run_all.sh
         env:
           FILE_ENV: ${{ matrix.file-env }}
+
+      - name: Dump all debug.log files on failure (fuzz)
+        if: failure() && matrix.job-type == 'fuzz'
+        shell: bash
+        run: |
+          set +e
+          echo "== Searching for debug.log under ci/scratch =="
+          find "$GITHUB_WORKSPACE/ci/scratch" -type f -name debug.log | while read -r LOGFILE; do
+            echo ""
+            echo "=================================================="
+            echo "FILE: $LOGFILE"
+            echo "=================================================="
+            tail -n 400 "$LOGFILE"
+          done
+
+      - name: Upload fuzz debug artifacts on failure
+        if: failure() && matrix.job-type == 'fuzz'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-arm64-fuzz-debug-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: warn
+          retention-days: 7
+          path: |
+            ci/scratch/**/debug.log
+            ci/scratch/**/blocks/index/**
+            ci/scratch/**/blocks/blk*.dat
+            ci/scratch/**/blocks/rev*.dat
 
       - name: Save Ccache cache
         uses: actions/cache/save@v4
